@@ -1,40 +1,42 @@
+import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from lightgbm import LGBMClassifier
 from sklearn.preprocessing import LabelEncoder
-from imblearn.over_sampling import SMOTE
-from sklearn.utils import shuffle
-from joblib import dump
+import joblib
+
+# Base directory
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Load dataset
-df = pd.read_csv("ObesityDataSet.csv")  # ensure CSV is in the same folder
+csv_path = os.path.join(BASE_DIR, "data", "ObesityDataSet.csv")
+if not os.path.exists(csv_path):
+    raise FileNotFoundError(f"CSV not found at {csv_path}")
+
+df = pd.read_csv(csv_path)
 
 # Encode categorical columns
-cat_cols = [col for col in df.columns if df[col].dtype == "object"]
-le = LabelEncoder()
+cat_cols = ['Gender', 'CALC', 'FAVC', 'SCC', 'SMOKE',
+            'family_history_with_overweight', 'CAEC', 'MTRANS']
+encoders = {}
 for col in cat_cols:
+    le = LabelEncoder()
     df[col] = le.fit_transform(df[col])
+    encoders[col] = le
 
 # Features and target
 X = df.drop(columns=['NObeyesdad'])
 y = df['NObeyesdad']
 
-# Apply SMOTE to balance classes
-smote = SMOTE(sampling_strategy='auto', random_state=42)
-X_res, y_res = smote.fit_resample(X, y)
+# Train/test split
+x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Shuffle and split
-X_res, y_res = shuffle(X_res, y_res, random_state=42)
-x_train, x_test, y_train, y_test = train_test_split(X_res, y_res, test_size=0.2, random_state=42)
-
-# Train LightGBM
-model = LGBMClassifier(random_state=42)
+# Train model
+model = LGBMClassifier()
 model.fit(x_train, y_train)
 
-# Optional: print training accuracy
-train_acc = model.score(x_train, y_train)
-print(f"Training Accuracy: {train_acc:.2f}")
+# Save model and encoders
+joblib.dump(model, os.path.join(BASE_DIR, "modules", "lgbm_model.joblib"))
+joblib.dump(encoders, os.path.join(BASE_DIR, "modules", "encoders.joblib"))
 
-# Save the trained model
-dump(model, "lgbm_model.joblib")
-print("Model trained and saved as 'lgbm_model.joblib'.")
+print("Model and encoders saved successfully.")

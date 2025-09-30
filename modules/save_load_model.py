@@ -1,13 +1,11 @@
 # modules/save_load_model.py
-from joblib import dump, load
+import os
+from joblib import load
 
-def save_model(model, filename):
-    """Save a trained model to disk."""
-    dump(model, filename)
-    print(f"Model saved as '{filename}'")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-def load_model(filename):
-    """Load a trained model from disk."""
-    model = load(filename)
-    print(f"Model loaded from '{filename}'")
-    return model
+def load_model(filename="lgbm_model.joblib"):
+    return load(os.path.join(BASE_DIR, "modules", filename))
+
+def load_encoders(filename="encoders.joblib"):
+    return load(os.path.join(BASE_DIR, "modules", filename))
