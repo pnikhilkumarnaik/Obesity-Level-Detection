@@ -16,7 +16,8 @@ setup(
         "scikit-learn",
         "lightgbm",
         "xgboost",
-        "joblib"
+        "joblib",
+        "streamlit"
     ],
     python_requires='>=3.8',              
 )

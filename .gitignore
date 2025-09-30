@@ -1,7 +1,7 @@
 lgbm1.pkl
 lgbm1.joblib
 
-obesity/
+obesityEnv/
 __pycache__/
 *.pyc
 obesity_detection.egg-info

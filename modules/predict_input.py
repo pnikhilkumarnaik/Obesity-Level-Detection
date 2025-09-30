@@ -1,4 +1,3 @@
-# modules/predict_input.py
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
@@ -17,11 +16,14 @@ def predict_from_input(model, input_dict, cat_cols):
     Predict obesity level based on a dictionary of inputs.
     """
     input_df = pd.DataFrame([input_dict])
-    le = LabelEncoder()
+
+    # Correctly encode categorical columns
     for col in cat_cols:
         if col in input_df:
-            input_df[col] = le.fit_transform([str(input_df[col])])[0]
+            le = LabelEncoder()
+            # Fit on the input value itself (single row)
+            input_df[col] = le.fit([input_dict[col]]).transform([input_dict[col]])
 
     prediction = model.predict(input_df)[0]
     print("Predicted Obesity Level:", class_mapping.get(prediction, "Unknown"))
-    return prediction
+    return class_mapping.get(prediction, "Unknown")
